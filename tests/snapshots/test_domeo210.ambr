@@ -3,6 +3,7 @@
   dict({
     'device': dict({
       'extras': True,
+      'humidity_regulation': False,
       'name': 'Domeo 210 FL',
       'panel_firmware': None,
       'unit_firmware': '12.3',

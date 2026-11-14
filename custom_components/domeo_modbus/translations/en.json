@@ -5,7 +5,7 @@
         },
         "error": {
             "cannot_connect": "Failed to connect",
-            "not_a_domeo_210": "A device answers at this address, but it does not answer like a Domeo 210 (its airflow settings or temperatures are outside the Domeo 210 table). If it is a DOMEO EVO, choose its size in the model list.",
+            "not_a_domeo_210": "A device answers at this address, but it does not answer like a Domeo 210 (its airflow settings are outside the Domeo 210 table). If it is a DOMEO EVO, choose its size in the model list.",
             "not_a_domeo_evo": "A device answers at this address, but it does not answer like a DOMEO EVO. If it is a Domeo 210, choose Domeo 210 in the model list. The rest of the previous Domeo range (Domeo DHU or Hygro, Flexeo, Ideo, Atacama) is not supported.",
             "range_changed": "This entry is for another range of unit (DOMEO EVO or Domeo 210). To change range, delete the device and add it again.",
             "unit_silent": "The link is up, but the unit does not answer. Check that jumper JP1 is closed, and that the line settings (19200 baud, even parity, 1 stop bit by default) match the unit.",

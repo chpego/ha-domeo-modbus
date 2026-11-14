@@ -5,7 +5,7 @@
     },
     "error": {
       "cannot_connect": "Échec de la connexion",
-      "not_a_domeo_210": "Un appareil répond à cette adresse, mais pas comme une Domeo 210 (ses réglages de débit ou ses températures sortent de la table de la Domeo 210). Si c'est une DOMEO EVO, choisissez sa taille dans la liste des modèles.",
+      "not_a_domeo_210": "Un appareil répond à cette adresse, mais pas comme une Domeo 210 (ses réglages de débit sortent de la table de la Domeo 210). Si c'est une DOMEO EVO, choisissez sa taille dans la liste des modèles.",
       "not_a_domeo_evo": "Un appareil répond à cette adresse, mais pas comme une DOMEO EVO. Si c'est une Domeo 210, choisissez Domeo 210 dans la liste des modèles. Le reste de l'ancienne gamme Domeo (Domeo DHU ou Hygro, Flexeo, Ideo, Atacama) n'est pas pris en charge.",
       "range_changed": "Cette entrée concerne une autre gamme de VMC (DOMEO EVO ou Domeo 210). Pour changer de gamme, supprimez l'appareil puis ajoutez-le à nouveau.",
       "unit_silent": "La liaison fonctionne, mais la VMC ne répond pas. Vérifiez que le cavalier JP1 est fermé et que les réglages de ligne (19200 bauds, parité paire, 1 bit de stop par défaut) correspondent à la VMC.",

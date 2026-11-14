@@ -41,6 +41,7 @@ async def async_get_config_entry_diagnostics(
         version = device.controls.version
         summary["version"] = None if version is None else version.name.lower()
         summary["extras"] = device.extras is not None
+        summary["humidity_regulation"] = device.humidity_settings is not None
 
     return {
         "entry_data": async_redact_data(dict(entry.data), TO_REDACT),
