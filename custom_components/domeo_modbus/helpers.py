@@ -27,7 +27,7 @@ from .domeo_evo_modbus import (
 def create_device(unit: ModbusUnit, data: Mapping[str, Any]) -> AnyDomeo:
     """The device object for the model in config entry data."""
     if data[CONF_MODEL] == MODEL_DOMEO_210:
-        return Domeo210(unit)
+        return Domeo210(unit, Variant(data[CONF_VARIANT]))
     return DomeoEvo(unit, Model(data[CONF_MODEL]), Variant(data[CONF_VARIANT]))
 
 

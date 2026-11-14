@@ -9,7 +9,8 @@
       "not_a_domeo_evo": "Un appareil répond à cette adresse, mais pas comme une DOMEO EVO. Si c'est une Domeo 210, choisissez Domeo 210 dans la liste des modèles. Le reste de l'ancienne gamme Domeo (Domeo DHU ou Hygro, Flexeo, Ideo, Atacama) n'est pas pris en charge.",
       "range_changed": "Cette entrée concerne une autre gamme de VMC (DOMEO EVO ou Domeo 210). Pour changer de gamme, supprimez l'appareil puis ajoutez-le à nouveau.",
       "unit_silent": "La liaison fonctionne, mais la VMC ne répond pas. Vérifiez que le cavalier JP1 est fermé et que les réglages de ligne (19200 bauds, parité paire, 1 bit de stop par défaut) correspondent à la VMC.",
-      "unknown": "Erreur inattendue"
+      "unknown": "Erreur inattendue",
+      "variant_not_available": "La Domeo 210 n'existe qu'en FL et en DHU."
     },
     "step": {
       "reconfigure": {
@@ -34,7 +35,7 @@
           "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "parity": "La parité de la VMC. Réglage d'usine : paire.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. Sans effet pour la Domeo 210."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC sur un port série"
       },
@@ -51,7 +52,7 @@
           "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "port": "Le port Modbus TCP de la passerelle, en général 502.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. Sans effet pour la Domeo 210."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC derrière une passerelle Modbus TCP"
       },
@@ -70,7 +71,7 @@
           "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "parity": "La parité de la VMC. Réglage d'usine : paire.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. Sans effet pour la Domeo 210."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC sur un port série"
       },
@@ -87,7 +88,7 @@
           "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "port": "Le port Modbus TCP de la passerelle, en général 502.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. Sans effet pour la Domeo 210."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC derrière une passerelle Modbus TCP"
       },
@@ -391,7 +392,7 @@
     },
     "variant": {
       "options": {
-        "dhu": "DOMEO EVO DHU (détection d'humidité)",
+        "dhu": "DHU (détection d'humidité)",
         "fl": "FL ou RD (sans régulation hygro)",
         "serenite": "Sérénité (qualité d'air et humidité)"
       }

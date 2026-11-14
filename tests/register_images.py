@@ -116,8 +116,8 @@ PREVIOUS_DOMEO_210_FL: dict[str, dict[int, Any]] = {
         10: 135,  # boost airflow
         11: 210,  # freecooling airflow
         15: 0,  # airflow command: low
-        16: 60,  # 0-10 V minimum airflow
-        17: 210,  # 0-10 V maximum airflow
+        16: 60,  # FL table: 0-10 V minimum airflow
+        17: 210,  # FL table: 0-10 V maximum airflow
         22: 12,  # bypass: outdoor minimum
         23: 24,  # bypass: indoor minimum
         24: 8,  # manual bypass duration, h
@@ -126,18 +126,40 @@ PREVIOUS_DOMEO_210_FL: dict[str, dict[int, Any]] = {
         27: 4,
         28: 18,
         31: 6,  # filter interval, months
-        32: 0,
-        33: 100,
+        32: 0,  # FL table: 0-10 V minimum voltage
+        33: 100,  # FL table: 0-10 V maximum voltage
     },
 }
 
-# Every address the Domeo 210 tables document, by space: the 2017 table, plus
-# the input registers only the 2014 table documents.
+# A factory-fresh Domeo 210 DHU, France version (S&P "Domeo humedad para
+# Francia" table of 2017): the FL image without the FL-only registers, plus
+# the humidity regulation.
+PREVIOUS_DOMEO_210_DHU: dict[str, dict[int, Any]] = deepcopy(PREVIOUS_DOMEO_210_FL)
+for _address in (16, 17, 32, 33):
+    del PREVIOUS_DOMEO_210_DHU["holding"][_address]
+PREVIOUS_DOMEO_210_DHU["holding"].update(
+    {
+        18: 60,  # humidity regulation: minimum airflow
+        19: 210,  # humidity regulation: maximum airflow
+        20: 60,  # humidity regulation: minimum level, %RH
+        21: 90,  # humidity regulation: maximum level, %RH
+    }
+)
+
+# Every address the 2017 table of each Domeo 210 variant documents, by space,
+# plus the input registers only the 2014 table documents.
+_DOCUMENTED_210_INPUTS = {*range(6, 11), *range(12, 18), 19, 20, *range(21, 28)}
 DOCUMENTED_210: dict[str, set[int]] = {
-    "input": {*range(6, 11), *range(12, 18), 19, 20, *range(21, 28)},
+    "input": _DOCUMENTED_210_INPUTS,
     "discrete": {5, 6, 7, *range(10, 15)},
     "coil": {1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14},
     "holding": {0, 1, 2, 8, 9, 10, 11, *range(15, 18), *range(22, 29), *range(31, 34)},
+}
+DOCUMENTED_210_DHU: dict[str, set[int]] = {
+    "input": _DOCUMENTED_210_INPUTS,
+    "discrete": {5, 6, 7, *range(10, 15)},
+    "coil": {2, 3, 4, 6, 7, 8, 9, 12, 13, 14},
+    "holding": {0, 1, 2, 8, 9, 10, 11, 15, *range(18, 29), 31},
 }
 
 # Every address the S&P table documents, by space.

@@ -145,6 +145,38 @@ NUMBERS_210: tuple[DomeoEvoNumberEntityDescription[AnyDomeo], ...] = (
 )
 
 
+def _humidity_210(
+    field: str, unit: str, limits_fn: Callable[[Domeo210], tuple[int, int]]
+) -> DomeoEvoNumberEntityDescription[Domeo210]:
+    """Describe one of the four humidity regulation settings of the 210 DHU.
+
+    The entity offers the table's full range; the library refuses a value
+    that comes too close to the other bound.
+    """
+    key = f"sensor_{field}"
+    return DomeoEvoNumberEntityDescription[Domeo210](
+        key=key,
+        translation_key=key,
+        component="humidity_settings",
+        device_class=(NumberDeviceClass.VOLUME_FLOW_RATE if unit == _FLOW else None),
+        native_unit_of_measurement=unit,
+        entity_category=EntityCategory.CONFIG,
+        mode=NumberMode.BOX,
+        limits_fn=limits_fn,
+        value_fn=lambda device: getattr(device.humidity_settings, field),
+        write_fn=lambda device, value: device.async_set_humidity_setting(field, value),
+    )
+
+
+# The humidity regulation of the Domeo 210 DHU, named like the DOMEO EVO's.
+HUMIDITY_NUMBERS_210: tuple[DomeoEvoNumberEntityDescription[Domeo210], ...] = (
+    _humidity_210("minimum_flow", _FLOW, lambda d: d.flow_limits.maximum),
+    _humidity_210("maximum_flow", _FLOW, lambda d: d.flow_limits.maximum),
+    _humidity_210("minimum_level", PERCENTAGE, lambda d: (60, 90)),
+    _humidity_210("maximum_level", PERCENTAGE, lambda d: (60, 90)),
+)
+
+
 def _regulation_numbers(
     device: DomeoEvo,
 ) -> Iterable[DomeoEvoNumberEntityDescription]:
@@ -229,6 +261,8 @@ async def async_setup_entry(
     descriptions: list[DomeoEvoNumberEntityDescription[Any]] = list(COMMON_NUMBERS)
     if isinstance(device, Domeo210):
         descriptions += NUMBERS_210
+        if device.humidity_settings is not None:
+            descriptions += HUMIDITY_NUMBERS_210
     else:
         descriptions += (*NUMBERS, *_regulation_numbers(device))
     async_add_entities(

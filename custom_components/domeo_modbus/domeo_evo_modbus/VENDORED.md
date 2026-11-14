@@ -1,3 +1,3 @@
-Vendored from domeo-evo-modbus at commit 7d175237249bde0e130d751db16ef426f006eb08.
+Vendored from domeo-evo-modbus at commit ccfe7eacb0287d76729d393ee6ef2942a03ebc7c.
 
 Re-vendor with: scripts/vendor_domeo_evo_modbus.sh <path to a domeo-evo-modbus checkout>

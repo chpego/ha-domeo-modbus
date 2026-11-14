@@ -13,6 +13,7 @@ from .domeo210 import (
     Domeo210,
     Domeo210Version,
     HeaterState,
+    HumiditySettings210,
     NotADomeo210Error,
 )
 from .enums import (
@@ -70,6 +71,7 @@ __all__ = [
     "FlowLimits",
     "HeaterState",
     "HumiditySettings",
+    "HumiditySettings210",
     "Identity",
     "LimitSwitchState",
     "Model",

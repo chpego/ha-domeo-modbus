@@ -9,7 +9,8 @@
             "not_a_domeo_evo": "A device answers at this address, but it does not answer like a DOMEO EVO. If it is a Domeo 210, choose Domeo 210 in the model list. The rest of the previous Domeo range (Domeo DHU or Hygro, Flexeo, Ideo, Atacama) is not supported.",
             "range_changed": "This entry is for another range of unit (DOMEO EVO or Domeo 210). To change range, delete the device and add it again.",
             "unit_silent": "The link is up, but the unit does not answer. Check that jumper JP1 is closed, and that the line settings (19200 baud, even parity, 1 stop bit by default) match the unit.",
-            "unknown": "Unexpected error"
+            "unknown": "Unexpected error",
+            "variant_not_available": "The Domeo 210 exists only in FL and DHU."
         },
         "step": {
             "reconfigure": {
@@ -34,7 +35,7 @@
                     "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "parity": "The parity of the unit. The factory setting is even.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. Ignored for the Domeo 210."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit on a serial port"
             },
@@ -51,7 +52,7 @@
                     "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "port": "The Modbus TCP port of the gateway, usually 502.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. Ignored for the Domeo 210."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit behind a Modbus TCP gateway"
             },
@@ -70,7 +71,7 @@
                     "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "parity": "The parity of the unit. The factory setting is even.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. Ignored for the Domeo 210."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit on a serial port"
             },
@@ -87,7 +88,7 @@
                     "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "port": "The Modbus TCP port of the gateway, usually 502.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. Ignored for the Domeo 210."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit behind a Modbus TCP gateway"
             },
@@ -391,7 +392,7 @@
         },
         "variant": {
             "options": {
-                "dhu": "DOMEO EVO DHU (humidity detection)",
+                "dhu": "DHU (humidity detection)",
                 "fl": "FL or RD (no humidity regulation)",
                 "serenite": "S\u00e9r\u00e9nit\u00e9 (air quality and humidity)"
             }

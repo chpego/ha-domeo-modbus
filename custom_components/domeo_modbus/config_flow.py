@@ -120,6 +120,10 @@ IDENTITY_KEYS = {
 }
 
 
+class _VariantNotAvailableError(Exception):
+    """The chosen model has no such variant."""
+
+
 class _UnitSilentError(Exception):
     """The link is up, but the unit behind it does not answer."""
 
@@ -129,20 +133,11 @@ def _is_210(data: Mapping[str, Any]) -> bool:
     return bool(data[CONF_MODEL] == MODEL_DOMEO_210)
 
 
-def _link_data(connection_type: str, user_input: Mapping[str, Any]) -> dict[str, Any]:
-    """The config entry data for what the user entered.
-
-    The Domeo 210 has no variant to choose, so the field is ignored for it.
-    """
-    data = {CONF_TYPE: connection_type, **user_input}
-    if _is_210(data):
-        data[CONF_VARIANT] = Variant.FL.value
-    return data
-
-
 async def _async_probe(hass: HomeAssistant, data: Mapping[str, Any]) -> AnyDomeo:
     """Read the unit behind these link settings, or raise."""
     params = create_modbus_params(data)
+    if _is_210(data) and data[CONF_VARIANT] == Variant.SERENITE:
+        raise _VariantNotAvailableError
     async with async_get_temporary_unit(hass, params, data[CONF_UNIT_ID]) as unit:
         device = create_device(unit, data)
         try:
@@ -152,6 +147,17 @@ async def _async_probe(hass: HomeAssistant, data: Mapping[str, Any]) -> AnyDomeo
                 raise _UnitSilentError from err
             raise
     return device
+
+
+# What the form shows for each known way a probe fails, first match wins.
+_PROBE_ERRORS: tuple[tuple[type[Exception], str], ...] = (
+    (_VariantNotAvailableError, "variant_not_available"),
+    (_UnitSilentError, "unit_silent"),
+    (NotADomeoEvoError, "not_a_domeo_evo"),
+    (NotADomeo210Error, "not_a_domeo_210"),
+    (ModbusError, "cannot_connect"),
+    (HomeAssistantError, "cannot_connect"),
+)
 
 
 def _same_unit(data: Mapping[str, Any], other: Mapping[str, Any]) -> bool:
@@ -198,7 +204,7 @@ class DomeoEvoConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         placeholders: dict[str, str] = {}
         if user_input is not None:
-            data = _link_data(connection_type, user_input)
+            data = {CONF_TYPE: connection_type, **user_input}
             # The unit has no serial number to use as a unique ID.
             self._async_abort_entries_match(
                 {key: data[key] for key in IDENTITY_KEYS[connection_type]}
@@ -251,7 +257,7 @@ class DomeoEvoConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         placeholders: dict[str, str] = {}
         if user_input is not None:
-            data = _link_data(connection_type, user_input)
+            data = {CONF_TYPE: connection_type, **user_input}
             if any(
                 _same_unit(data, other.data)
                 for other in self._async_current_entries()
@@ -305,14 +311,16 @@ class DomeoEvoConfigFlow(ConfigFlow, domain=DOMAIN):
         """Probe the unit, returning it or the errors to show instead."""
         try:
             device = await _async_probe(self.hass, data)
-        except _UnitSilentError:
-            return None, {"base": "unit_silent"}, {}
-        except NotADomeoEvoError:
-            return None, {"base": "not_a_domeo_evo"}, {}
-        except NotADomeo210Error:
-            return None, {"base": "not_a_domeo_210"}, {}
-        except ModbusError, HomeAssistantError:
-            return None, {"base": "cannot_connect"}, {}
+        except (
+            _VariantNotAvailableError,
+            _UnitSilentError,
+            NotADomeoEvoError,
+            NotADomeo210Error,
+            ModbusError,
+            HomeAssistantError,
+        ) as err:
+            error = next(key for kind, key in _PROBE_ERRORS if isinstance(err, kind))
+            return None, {"base": error}, {}
         except Exception:
             _LOGGER.exception("Unexpected exception")
             return None, {"base": "unknown"}, {}

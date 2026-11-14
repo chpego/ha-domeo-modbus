@@ -3,7 +3,7 @@
   dict({
     'device': dict({
       'extras': True,
-      'name': 'Domeo 210',
+      'name': 'Domeo 210 FL',
       'panel_firmware': None,
       'unit_firmware': '12.3',
       'version': 'france',
@@ -18,7 +18,6 @@
     }),
     'raw': dict({
       'coil': dict({
-        '1': False,
         '14': False,
         '2': False,
         '3': False,
@@ -44,8 +43,6 @@
         '10': 135,
         '11': 210,
         '15': 0,
-        '16': 60,
-        '17': 210,
         '2': 2,
         '22': 12,
         '23': 24,
@@ -55,8 +52,6 @@
         '27': 4,
         '28': 18,
         '31': 6,
-        '32': 0,
-        '33': 100,
         '8': 0,
         '9': 60,
       }),

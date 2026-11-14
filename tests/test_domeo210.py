@@ -40,7 +40,11 @@ from custom_components.domeo_modbus.const import CONF_VARIANT, DOMAIN
 from custom_components.domeo_modbus.coordinator import modbus_control_issue_id
 
 from . import MOCK_210_DATA, MOCK_210_TITLE, MOCK_ENTRY_ID, MOCK_TCP_INPUT
-from .register_images import FACTORY_225_FL, PREVIOUS_DOMEO_210_FL
+from .register_images import (
+    FACTORY_225_FL,
+    PREVIOUS_DOMEO_210_DHU,
+    PREVIOUS_DOMEO_210_FL,
+)
 
 COIL = 0x05
 FC06 = 0x06
@@ -94,18 +98,41 @@ async def _start(hass: HomeAssistant) -> str:
 
 
 @pytest.mark.usefixtures("mock_temporary_unit")
+@pytest.mark.parametrize(
+    ("register_image", "variant", "title"),
+    [
+        pytest.param(PREVIOUS_DOMEO_210_FL, "fl", "Domeo 210 FL", id="fl"),
+        pytest.param(PREVIOUS_DOMEO_210_DHU, "dhu", "Domeo 210 DHU", id="dhu"),
+    ],
+    indirect=["register_image"],
+)
+@pytest.mark.usefixtures("mock_temporary_unit")
 async def test_user_flow_adds_a_domeo_210(
-    hass: HomeAssistant, mock_setup_entry: AsyncMock
+    hass: HomeAssistant, mock_setup_entry: AsyncMock, variant: str, title: str
 ) -> None:
-    """Test the Domeo 210 is added, and its variant field is ignored."""
+    """Test a Domeo 210 of either variant is added."""
     flow_id = await _start(hass)
     result = await hass.config_entries.flow.async_configure(
-        flow_id, {**MOCK_TCP_INPUT, CONF_MODEL: "210", CONF_VARIANT: "dhu"}
+        flow_id, {**MOCK_TCP_INPUT, CONF_MODEL: "210", CONF_VARIANT: variant}
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "Domeo 210"
-    assert result["data"] == MOCK_210_DATA
+    assert result["title"] == title
+    assert result["data"] == {**MOCK_210_DATA, CONF_VARIANT: variant}
+
+
+@pytest.mark.usefixtures("mock_temporary_unit")
+async def test_user_flow_refuses_a_serenite_domeo_210(
+    hass: HomeAssistant, mock_setup_entry: AsyncMock
+) -> None:
+    """Test the Domeo 210 cannot be added as a Serenite."""
+    flow_id = await _start(hass)
+    result = await hass.config_entries.flow.async_configure(
+        flow_id, {**MOCK_TCP_INPUT, CONF_MODEL: "210", CONF_VARIANT: "serenite"}
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "variant_not_available"}
 
 
 @pytest.mark.parametrize("register_image", [FACTORY_225_FL], indirect=True)
@@ -313,3 +340,44 @@ async def test_diagnostics(
         await get_diagnostics_for_config_entry(hass, hass_client, init_integration)
         == snapshot
     )
+
+
+@pytest.mark.parametrize(
+    ("register_image", "entry_data"),
+    [(PREVIOUS_DOMEO_210_DHU, {**MOCK_210_DATA, CONF_VARIANT: "dhu"})],
+    indirect=True,
+)
+@pytest.mark.usefixtures("init_integration")
+async def test_dhu_humidity_regulation(
+    hass: HomeAssistant, writes: list[WriteEvent]
+) -> None:
+    """Test the DHU gets its humidity regulation, and the table's gaps hold."""
+    level = hass.states.get("number.domeo_210_humidity_upper_threshold")
+    assert level is not None
+    assert level.state == "90"
+    assert hass.states.get("number.domeo_210_humidity_maximum_airflow") is not None
+
+    await hass.services.async_call(
+        NUMBER_DOMAIN,
+        SERVICE_SET_VALUE,
+        {ATTR_ENTITY_ID: "number.domeo_210_humidity_upper_threshold", ATTR_VALUE: 80},
+        blocking=True,
+    )
+    assert writes == [WriteEvent("holding", 21, [80], FC06)]
+
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            NUMBER_DOMAIN,
+            SERVICE_SET_VALUE,
+            {
+                ATTR_ENTITY_ID: "number.domeo_210_humidity_lower_threshold",
+                ATTR_VALUE: 85,
+            },
+            blocking=True,
+        )
+
+
+@pytest.mark.usefixtures("init_integration")
+async def test_fl_has_no_humidity_regulation(hass: HomeAssistant) -> None:
+    """Test the FL gets no humidity regulation settings."""
+    assert hass.states.get("number.domeo_210_humidity_upper_threshold") is None
