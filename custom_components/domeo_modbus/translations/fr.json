@@ -5,9 +5,12 @@
     },
     "error": {
       "cannot_connect": "Échec de la connexion",
-      "not_a_domeo_evo": "Un appareil répond à cette adresse, mais pas comme une DOMEO EVO. L'ancienne gamme Domeo (Domeo 210, Domeo DHU ou Hygro, Flexeo, Ideo, Atacama) utilise une autre table de registres et n'est pas prise en charge.",
+      "not_a_domeo_210": "Un appareil répond à cette adresse, mais pas comme une Domeo 210 (ses réglages de débit sortent de la table de la Domeo 210). Si c'est une DOMEO EVO, choisissez sa taille dans la liste des modèles.",
+      "not_a_domeo_evo": "Un appareil répond à cette adresse, mais pas comme une DOMEO EVO. Si c'est une Domeo 210, choisissez Domeo 210 dans la liste des modèles. Le reste de l'ancienne gamme Domeo (Domeo DHU ou Hygro, Flexeo, Ideo, Atacama) n'est pas pris en charge.",
+      "range_changed": "Cette entrée concerne une autre gamme de VMC (DOMEO EVO ou Domeo 210). Pour changer de gamme, supprimez l'appareil puis ajoutez-le à nouveau.",
       "unit_silent": "La liaison fonctionne, mais la VMC ne répond pas. Vérifiez que le cavalier JP1 est fermé et que les réglages de ligne (19200 bauds, parité paire, 1 bit de stop par défaut) correspondent à la VMC.",
-      "unknown": "Erreur inattendue"
+      "unknown": "Erreur inattendue",
+      "variant_not_available": "La Domeo 210 n'existe qu'en FL et en DHU."
     },
     "step": {
       "reconfigure": {
@@ -29,10 +32,10 @@
         "data_description": {
           "baudrate": "La vitesse de ligne de la VMC. Réglage d'usine : 19200.",
           "device": "L'adaptateur RS485 auquel la VMC est raccordée.",
-          "model": "La taille indiquée sur la plaque de la VMC. Elle fixe les plages de débit autorisées.",
+          "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "parity": "La parité de la VMC. Réglage d'usine : paire.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC sur un port série"
       },
@@ -46,10 +49,10 @@
         },
         "data_description": {
           "host": "Le nom ou l'adresse IP de la passerelle RS485. Réglez-la en Modbus TCP vers RTU, 19200 bauds, parité paire, 1 bit de stop.",
-          "model": "La taille indiquée sur la plaque de la VMC. Elle fixe les plages de débit autorisées.",
+          "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "port": "Le port Modbus TCP de la passerelle, en général 502.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC derrière une passerelle Modbus TCP"
       },
@@ -65,10 +68,10 @@
         "data_description": {
           "baudrate": "La vitesse de ligne de la VMC. Réglage d'usine : 19200.",
           "device": "L'adaptateur RS485 auquel la VMC est raccordée.",
-          "model": "La taille indiquée sur la plaque de la VMC. Elle fixe les plages de débit autorisées.",
+          "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "parity": "La parité de la VMC. Réglage d'usine : paire.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC sur un port série"
       },
@@ -82,10 +85,10 @@
         },
         "data_description": {
           "host": "Le nom ou l'adresse IP de la passerelle RS485. Réglez-la en Modbus TCP vers RTU, 19200 bauds, parité paire, 1 bit de stop.",
-          "model": "La taille indiquée sur la plaque de la VMC. Elle fixe les plages de débit autorisées.",
+          "model": "La taille indiquée sur la plaque de la VMC (DOMEO EVO), ou Domeo 210 pour ce modèle de l'ancienne gamme. Elle fixe les plages de débit autorisées.",
           "port": "Le port Modbus TCP de la passerelle, en général 502.",
           "unit_id": "L'adresse Modbus de la VMC. Réglage d'usine : 1.",
-          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL."
+          "variant": "Les versions DHU et Sérénité régulent selon l'humidité ou la qualité d'air. Pas la version FL. La Domeo 210 existe en FL et en DHU."
         },
         "title": "VMC derrière une passerelle Modbus TCP"
       },
@@ -109,6 +112,9 @@
       "exhaust_probe_fault": {
         "name": "Sonde air rejeté"
       },
+      "extract_motor_fault": {
+        "name": "Ventilateur d'extraction"
+      },
       "extract_probe_fault": {
         "name": "Sonde air extrait"
       },
@@ -129,6 +135,9 @@
       },
       "pre_exchanger_probe_fault": {
         "name": "Sonde avant échangeur"
+      },
+      "supply_motor_fault": {
+        "name": "Ventilateur de soufflage"
       },
       "supply_probe_fault": {
         "name": "Sonde air soufflé"
@@ -157,6 +166,9 @@
       },
       "flow_offset": {
         "name": "Décalage du débit"
+      },
+      "flow_unbalance": {
+        "name": "Déséquilibre soufflage/extraction"
       },
       "freecooling_flow": {
         "name": "Débit freecooling"
@@ -223,6 +235,14 @@
           "open": "Ouvert"
         }
       },
+      "bypass_state": {
+        "name": "By-pass",
+        "state": {
+          "closed": "Fermé",
+          "error": "Erreur",
+          "open": "Ouvert"
+        }
+      },
       "control_panel": {
         "name": "Commande",
         "state": {
@@ -233,6 +253,9 @@
       },
       "exhaust_temperature": {
         "name": "Température air rejeté"
+      },
+      "extract_fan_speed": {
+        "name": "Vitesse du ventilateur d'extraction"
       },
       "extract_temperature": {
         "name": "Température air extrait"
@@ -251,8 +274,30 @@
       "outdoor_temperature": {
         "name": "Température air extérieur"
       },
+      "postheater_battery": {
+        "name": "Batterie de chauffage",
+        "state": {
+          "off": "Arrêtée",
+          "on": "En marche",
+          "probe_1_error": "Erreur sonde 1",
+          "probe_2_error": "Erreur sonde 2",
+          "thermal_protection": "Protection thermique déclenchée",
+          "triac_error": "Erreur triac"
+        }
+      },
       "pre_exchanger_temperature": {
         "name": "Température avant échangeur"
+      },
+      "preheater_battery": {
+        "name": "Batterie de préchauffage",
+        "state": {
+          "off": "Arrêtée",
+          "on": "En marche",
+          "probe_1_error": "Erreur sonde 1",
+          "probe_2_error": "Erreur sonde 2",
+          "thermal_protection": "Protection thermique déclenchée",
+          "triac_error": "Erreur triac"
+        }
       },
       "preheater_state": {
         "name": "Batterie de préchauffage",
@@ -271,6 +316,9 @@
       },
       "probe_voc": {
         "name": "Sonde {probe} COV"
+      },
+      "supply_fan_speed": {
+        "name": "Vitesse du ventilateur de soufflage"
       },
       "supply_temperature": {
         "name": "Température air soufflé"
@@ -291,6 +339,9 @@
       },
       "manual_bypass": {
         "name": "By-pass manuel"
+      },
+      "standby": {
+        "name": "Veille"
       }
     }
   },
@@ -326,6 +377,7 @@
   "selector": {
     "model": {
       "options": {
+        "210": "Domeo 210 (ancienne gamme, en test)",
         "225": "DOMEO EVO 225",
         "315": "DOMEO EVO 315",
         "450": "DOMEO EVO 450"
@@ -340,7 +392,7 @@
     },
     "variant": {
       "options": {
-        "dhu": "DOMEO EVO DHU (détection d'humidité)",
+        "dhu": "DHU (détection d'humidité)",
         "fl": "FL ou RD (sans régulation hygro)",
         "serenite": "Sérénité (qualité d'air et humidité)"
       }

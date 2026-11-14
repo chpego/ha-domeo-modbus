@@ -10,38 +10,49 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .coordinator import DomeoEvoConfigEntry
-from .domeo_evo_modbus import DomeoEvo
+from .domeo_evo_modbus import AnyDomeo, Domeo210, Domeo210Version, DomeoEvo
 from .entity import DomeoEvoEntity, DomeoEvoEntityDescription
 
 PARALLEL_UPDATES = 1
 
 
 @dataclass(frozen=True, kw_only=True)
-class DomeoEvoSwitchEntityDescription(
+class DomeoEvoSwitchEntityDescription[D: AnyDomeo = DomeoEvo](
     SwitchEntityDescription, DomeoEvoEntityDescription
 ):
-    """Describe a DOMEO EVO switch."""
+    """Describe a switch of one range of units, or of both."""
 
-    value_fn: Callable[[DomeoEvo], bool | None]
-    write_fn: Callable[[DomeoEvo, bool], Awaitable[None]]
+    value_fn: Callable[[D], bool | None]
+    write_fn: Callable[[D, bool], Awaitable[None]]
 
 
-SWITCHES: tuple[DomeoEvoSwitchEntityDescription, ...] = (
-    DomeoEvoSwitchEntityDescription(
-        key="holiday_mode",
-        translation_key="holiday_mode",
-        component="controls",
-        value_fn=lambda device: device.controls.holiday_mode,
-        write_fn=lambda device, on: device.controls.async_set_holiday_mode(on),
-    ),
-    DomeoEvoSwitchEntityDescription(
+HOLIDAY_MODE = DomeoEvoSwitchEntityDescription[AnyDomeo](
+    key="holiday_mode",
+    translation_key="holiday_mode",
+    component="controls",
+    value_fn=lambda device: device.controls.holiday_mode,
+    write_fn=lambda device, on: device.controls.async_set_holiday_mode(on),
+)
+
+# The Europe version of the Domeo 210 stops instead of halving its airflow.
+STANDBY = DomeoEvoSwitchEntityDescription[Domeo210](
+    key="standby",
+    translation_key="standby",
+    component="controls",
+    value_fn=lambda device: device.controls.holiday_mode,
+    write_fn=lambda device, on: device.controls.async_set_holiday_mode(on),
+)
+
+# The switches both ranges have, besides holiday mode.
+COMMON_SWITCHES: tuple[DomeoEvoSwitchEntityDescription[AnyDomeo], ...] = (
+    DomeoEvoSwitchEntityDescription[AnyDomeo](
         key="manual_bypass",
         translation_key="manual_bypass",
         component="controls",
         value_fn=lambda device: device.controls.manual_bypass,
         write_fn=lambda device, on: device.controls.async_set_manual_bypass(on),
     ),
-    DomeoEvoSwitchEntityDescription(
+    DomeoEvoSwitchEntityDescription[AnyDomeo](
         key="auto_bypass",
         translation_key="auto_bypass",
         component="controls",
@@ -49,6 +60,10 @@ SWITCHES: tuple[DomeoEvoSwitchEntityDescription, ...] = (
         value_fn=lambda device: device.controls.auto_bypass,
         write_fn=lambda device, on: device.controls.async_set_auto_bypass(on),
     ),
+)
+
+# The switches only the DOMEO EVO has.
+SWITCHES: tuple[DomeoEvoSwitchEntityDescription, ...] = (
     DomeoEvoSwitchEntityDescription(
         key="defrost_allowed",
         translation_key="defrost_allowed",
@@ -66,17 +81,24 @@ async def async_setup_entry(
     entry: DomeoEvoConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the DOMEO EVO switches."""
+    """Set up the switches of the unit."""
     runtime_data = entry.runtime_data
+    device = runtime_data.device
+    descriptions: list[DomeoEvoSwitchEntityDescription[Any]]
+    if isinstance(device, Domeo210):
+        europe = device.controls.version is Domeo210Version.EUROPE
+        descriptions = [STANDBY if europe else HOLIDAY_MODE, *COMMON_SWITCHES]
+    else:
+        descriptions = [HOLIDAY_MODE, *COMMON_SWITCHES, *SWITCHES]
     async_add_entities(
-        DomeoEvoSwitch(runtime_data, description) for description in SWITCHES
+        DomeoEvoSwitch(runtime_data, description) for description in descriptions
     )
 
 
 class DomeoEvoSwitch(DomeoEvoEntity, SwitchEntity):
-    """A DOMEO EVO switch."""
+    """A switch of the unit."""
 
-    entity_description: DomeoEvoSwitchEntityDescription
+    entity_description: DomeoEvoSwitchEntityDescription[Any]
 
     @property
     @override

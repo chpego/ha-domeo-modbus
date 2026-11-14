@@ -177,7 +177,7 @@ async def test_user_flow_probe_raises(
     """Test errors raised around the probe itself."""
     flow_id = await _start(hass, "tcp")
     with patch(
-        "custom_components.domeo_modbus.config_flow.DomeoEvo.async_validate",
+        "custom_components.domeo_modbus.domeo_evo_modbus.DomeoEvo.async_validate",
         side_effect=side_effect,
     ):
         result = await hass.config_entries.flow.async_configure(flow_id, MOCK_TCP_INPUT)
@@ -350,3 +350,30 @@ async def test_reconfigure_line_settings_of_a_loaded_entry(
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
     assert init_integration.data[CONF_BAUDRATE] == 9600
+
+
+@pytest.mark.parametrize(
+    ("entry_data", "model"),
+    [
+        pytest.param(MOCK_TCP_DATA, "210", id="evo_to_210"),
+        pytest.param({**MOCK_TCP_DATA, CONF_MODEL: "210"}, "225", id="210_to_evo"),
+    ],
+    indirect=["entry_data"],
+)
+async def test_reconfigure_refuses_another_range(
+    hass: HomeAssistant,
+    mock_setup_entry: AsyncMock,
+    mock_config_entry: MockConfigEntry,
+    entry_data: dict[str, Any],
+    model: str,
+) -> None:
+    """Test an entry cannot switch between the DOMEO EVO and the Domeo 210."""
+    mock_config_entry.add_to_hass(hass)
+    flow_id = await _start_reconfigure(hass, mock_config_entry, "reconfigure_tcp")
+    result = await hass.config_entries.flow.async_configure(
+        flow_id, {**MOCK_TCP_INPUT, CONF_MODEL: model}
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "range_changed"}
+    assert mock_config_entry.data == entry_data

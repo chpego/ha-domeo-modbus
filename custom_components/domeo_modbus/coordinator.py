@@ -15,7 +15,7 @@ from modbus_connection import ModbusError, ModbusTimeoutError
 from propcache.api import cached_property
 
 from .const import DOMAIN, MANUFACTURER, TIMEOUTS_BEFORE_RECONNECT
-from .domeo_evo_modbus import READINGS, DomeoEvo, UpdateReport
+from .domeo_evo_modbus import AnyDomeo, DomeoEvo, UpdateReport
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class DomeoEvoCoordinator(DataUpdateCoordinator[UpdateReport]):
         self,
         hass: HomeAssistant,
         entry: DomeoEvoConfigEntry,
-        device: DomeoEvo,
+        device: AnyDomeo,
         poll: Callable[[], Awaitable[UpdateReport]],
         interval: timedelta,
         *,
@@ -87,19 +87,19 @@ class DomeoEvoCoordinator(DataUpdateCoordinator[UpdateReport]):
                 "every component failed to refresh", list(report.failed.values())
             )
         self._log_component_changes(report)
-        if "status" in report.updated:
-            self._update_modbus_control_issue()
+        if "status" in report.updated and isinstance(self.device, DomeoEvo):
+            self._update_modbus_control_issue(self.device)
         return report
 
-    def _update_modbus_control_issue(self) -> None:
+    def _update_modbus_control_issue(self, device: DomeoEvo) -> None:
         """Raise a repair while jumper JP1 is open, and clear it once closed.
 
         With JP1 open the unit answers reads, so everything looks fine until
-        a command fails.
+        a command fails. Only the DOMEO EVO reports where JP1 stands.
         """
         issue_id = modbus_control_issue_id(self.config_entry)
         # Only called right after the status was read, so this is never None.
-        if self.device.status.modbus_control is False:
+        if device.status.modbus_control is False:
             ir.async_create_issue(
                 self.hass,
                 DOMAIN,
@@ -151,13 +151,15 @@ class DomeoEvoRuntimeData:
     settings: DomeoEvoCoordinator
 
     @property
-    def device(self) -> DomeoEvo:
+    def device(self) -> AnyDomeo:
         """The unit both coordinators poll."""
         return self.readings.device
 
     def coordinator_for(self, component: str) -> DomeoEvoCoordinator:
         """Which coordinator polls a given component."""
-        return self.readings if component in READINGS else self.settings
+        if component in self.device.readings_components:
+            return self.readings
+        return self.settings
 
 
 type DomeoEvoConfigEntry = ConfigEntry[DomeoEvoRuntimeData]

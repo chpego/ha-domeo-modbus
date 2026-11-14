@@ -5,9 +5,12 @@
         },
         "error": {
             "cannot_connect": "Failed to connect",
-            "not_a_domeo_evo": "A device answers at this address, but it does not answer like a DOMEO EVO. The previous Domeo range (Domeo 210, Domeo DHU or Hygro, Flexeo, Ideo, Atacama) uses another register table and is not supported.",
+            "not_a_domeo_210": "A device answers at this address, but it does not answer like a Domeo 210 (its airflow settings are outside the Domeo 210 table). If it is a DOMEO EVO, choose its size in the model list.",
+            "not_a_domeo_evo": "A device answers at this address, but it does not answer like a DOMEO EVO. If it is a Domeo 210, choose Domeo 210 in the model list. The rest of the previous Domeo range (Domeo DHU or Hygro, Flexeo, Ideo, Atacama) is not supported.",
+            "range_changed": "This entry is for another range of unit (DOMEO EVO or Domeo 210). To change range, delete the device and add it again.",
             "unit_silent": "The link is up, but the unit does not answer. Check that jumper JP1 is closed, and that the line settings (19200 baud, even parity, 1 stop bit by default) match the unit.",
-            "unknown": "Unexpected error"
+            "unknown": "Unexpected error",
+            "variant_not_available": "The Domeo 210 exists only in FL and DHU."
         },
         "step": {
             "reconfigure": {
@@ -29,10 +32,10 @@
                 "data_description": {
                     "baudrate": "The line speed of the unit. The factory setting is 19200.",
                     "device": "The RS485 adapter the unit is wired to.",
-                    "model": "The airflow class on the unit's rating plate. It sets the airflow ranges you can choose.",
+                    "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "parity": "The parity of the unit. The factory setting is even.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit on a serial port"
             },
@@ -46,10 +49,10 @@
                 },
                 "data_description": {
                     "host": "The hostname or IP address of the RS485 gateway. Set the gateway to Modbus TCP to RTU, 19200 baud, even parity, 1 stop bit.",
-                    "model": "The airflow class on the unit's rating plate. It sets the airflow ranges you can choose.",
+                    "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "port": "The Modbus TCP port of the gateway, usually 502.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit behind a Modbus TCP gateway"
             },
@@ -65,10 +68,10 @@
                 "data_description": {
                     "baudrate": "The line speed of the unit. The factory setting is 19200.",
                     "device": "The RS485 adapter the unit is wired to.",
-                    "model": "The airflow class on the unit's rating plate. It sets the airflow ranges you can choose.",
+                    "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "parity": "The parity of the unit. The factory setting is even.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit on a serial port"
             },
@@ -82,10 +85,10 @@
                 },
                 "data_description": {
                     "host": "The hostname or IP address of the RS485 gateway. Set the gateway to Modbus TCP to RTU, 19200 baud, even parity, 1 stop bit.",
-                    "model": "The airflow class on the unit's rating plate. It sets the airflow ranges you can choose.",
+                    "model": "The airflow class on the unit's rating plate (DOMEO EVO), or Domeo 210 for that unit of the previous range. It sets the airflow ranges you can choose.",
                     "port": "The Modbus TCP port of the gateway, usually 502.",
                     "unit_id": "The Modbus address of the unit. The factory setting is 1.",
-                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not."
+                    "variant": "DHU and S\u00e9r\u00e9nit\u00e9 units regulate on humidity or air quality. FL units do not. The Domeo 210 exists in FL and DHU."
                 },
                 "title": "Unit behind a Modbus TCP gateway"
             },
@@ -109,6 +112,9 @@
             "exhaust_probe_fault": {
                 "name": "Exhaust air probe"
             },
+            "extract_motor_fault": {
+                "name": "Extract fan"
+            },
             "extract_probe_fault": {
                 "name": "Extract air probe"
             },
@@ -129,6 +135,9 @@
             },
             "pre_exchanger_probe_fault": {
                 "name": "Pre-exchanger probe"
+            },
+            "supply_motor_fault": {
+                "name": "Supply fan"
             },
             "supply_probe_fault": {
                 "name": "Supply air probe"
@@ -157,6 +166,9 @@
             },
             "flow_offset": {
                 "name": "Airflow offset"
+            },
+            "flow_unbalance": {
+                "name": "Supply/extract unbalance"
             },
             "freecooling_flow": {
                 "name": "Freecooling airflow"
@@ -223,6 +235,14 @@
                     "open": "Open"
                 }
             },
+            "bypass_state": {
+                "name": "Bypass",
+                "state": {
+                    "closed": "Closed",
+                    "error": "Error",
+                    "open": "Open"
+                }
+            },
             "control_panel": {
                 "name": "Control panel",
                 "state": {
@@ -233,6 +253,9 @@
             },
             "exhaust_temperature": {
                 "name": "Exhaust air temperature"
+            },
+            "extract_fan_speed": {
+                "name": "Extract fan speed"
             },
             "extract_temperature": {
                 "name": "Extract air temperature"
@@ -251,8 +274,30 @@
             "outdoor_temperature": {
                 "name": "Outdoor air temperature"
             },
+            "postheater_battery": {
+                "name": "Post-heating battery",
+                "state": {
+                    "off": "Off",
+                    "on": "On",
+                    "probe_1_error": "Probe 1 error",
+                    "probe_2_error": "Probe 2 error",
+                    "thermal_protection": "Thermal protection tripped",
+                    "triac_error": "Triac error"
+                }
+            },
             "pre_exchanger_temperature": {
                 "name": "Pre-exchanger temperature"
+            },
+            "preheater_battery": {
+                "name": "Pre-heating battery",
+                "state": {
+                    "off": "Off",
+                    "on": "On",
+                    "probe_1_error": "Probe 1 error",
+                    "probe_2_error": "Probe 2 error",
+                    "thermal_protection": "Thermal protection tripped",
+                    "triac_error": "Triac error"
+                }
             },
             "preheater_state": {
                 "name": "Preheater",
@@ -271,6 +316,9 @@
             },
             "probe_voc": {
                 "name": "Probe {probe} volatile organic compounds"
+            },
+            "supply_fan_speed": {
+                "name": "Supply fan speed"
             },
             "supply_temperature": {
                 "name": "Supply air temperature"
@@ -291,6 +339,9 @@
             },
             "manual_bypass": {
                 "name": "Manual bypass"
+            },
+            "standby": {
+                "name": "Standby"
             }
         }
     },
@@ -326,6 +377,7 @@
     "selector": {
         "model": {
             "options": {
+                "210": "Domeo 210 (previous range, being tested)",
                 "225": "DOMEO EVO 225",
                 "315": "DOMEO EVO 315",
                 "450": "DOMEO EVO 450"
@@ -340,7 +392,7 @@
         },
         "variant": {
             "options": {
-                "dhu": "DOMEO EVO DHU (humidity detection)",
+                "dhu": "DHU (humidity detection)",
                 "fl": "FL or RD (no humidity regulation)",
                 "serenite": "S\u00e9r\u00e9nit\u00e9 (air quality and humidity)"
             }

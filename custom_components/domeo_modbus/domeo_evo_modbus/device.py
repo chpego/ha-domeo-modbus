@@ -50,6 +50,9 @@ class DomeoEvo(Device):
     decides whether the humidity regulation registers are read.
     """
 
+    readings_components = READINGS
+    settings_components = SETTINGS
+
     def __init__(
         self,
         unit: ModbusUnit,
@@ -117,7 +120,7 @@ class DomeoEvo(Device):
             raise NotADomeoEvoError(f"unexpected airflow {airflow!r}")
         # The previous Domeo range (210, DHU/Hygro, Flexeo, Ideo, Atacama) has
         # another register table: there, 30017 holds the current airflow and
-        # 30022 a temperature, not values from 0 to 2 (chpego/ha-domeo-evo#7).
+        # 30022 a temperature, not values from 0 to 2 (chpego/ha-domeo-modbus#7).
         if self.readings.bypass_limit_switch is None:
             raise NotADomeoEvoError("unexpected bypass limit switch state")
         if self.readings.control_panel is None:

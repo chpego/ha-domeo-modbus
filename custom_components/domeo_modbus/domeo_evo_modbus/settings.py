@@ -24,7 +24,7 @@ PARITIES = {0: "N", 1: "O", 2: "E"}
 # returns to its normal airflow on its own after 30 minutes. The table says
 # writing 0 stops it early, but a real unit ignores it (FC06 or FC16), and
 # S&P support confirmed a boost cannot be stopped over Modbus
-# (chpego/ha-domeo-evo#6).
+# (chpego/ha-domeo-modbus#6).
 BOOST_START = 1
 
 # The union of the airflow ranges of every unit size. The device object

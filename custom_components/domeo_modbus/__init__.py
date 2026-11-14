@@ -1,25 +1,18 @@
 """Integrate S&P DOMEO EVO ventilation units into Home Assistant."""
 
 from homeassistant.components.modbus import async_get_unit
-from homeassistant.const import CONF_MODEL, Platform
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 
-from .const import (
-    CONF_UNIT_ID,
-    CONF_VARIANT,
-    DOMAIN,
-    READINGS_INTERVAL,
-    SETTINGS_INTERVAL,
-)
+from .const import CONF_UNIT_ID, DOMAIN, READINGS_INTERVAL, SETTINGS_INTERVAL
 from .coordinator import (
     DomeoEvoConfigEntry,
     DomeoEvoCoordinator,
     DomeoEvoRuntimeData,
     modbus_control_issue_id,
 )
-from .domeo_evo_modbus import DomeoEvo, Model, Variant
-from .helpers import create_modbus_params
+from .helpers import create_device, create_modbus_params
 
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -32,13 +25,11 @@ PLATFORMS: list[Platform] = [
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: DomeoEvoConfigEntry) -> bool:
-    """Set up a DOMEO EVO from a config entry."""
+    """Set up a DOMEO EVO or a Domeo 210 from a config entry."""
     unit = async_get_unit(
         hass, entry, create_modbus_params(entry.data), entry.data[CONF_UNIT_ID]
     )
-    device = DomeoEvo(
-        unit, Model(entry.data[CONF_MODEL]), Variant(entry.data[CONF_VARIANT])
-    )
+    device = create_device(unit, entry.data)
 
     readings = DomeoEvoCoordinator(
         hass,

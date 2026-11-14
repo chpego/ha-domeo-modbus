@@ -42,11 +42,26 @@
       "airflow": {
         "default": "mdi:weather-windy"
       },
+      "bypass_state": {
+        "default": "mdi:valve"
+      },
+      "extract_fan_speed": {
+        "default": "mdi:fan"
+      },
       "operating_mode": {
         "default": "mdi:hvac"
       },
+      "postheater_battery": {
+        "default": "mdi:radiator"
+      },
+      "preheater_battery": {
+        "default": "mdi:radiator"
+      },
       "preheater_state": {
         "default": "mdi:radiator"
+      },
+      "supply_fan_speed": {
+        "default": "mdi:fan"
       }
     },
     "switch": {
@@ -64,6 +79,9 @@
         "state": {
           "off": "mdi:valve-closed"
         }
+      },
+      "standby": {
+        "default": "mdi:power-sleep"
       }
     }
   }

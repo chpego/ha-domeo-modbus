@@ -1,4 +1,4 @@
-"""Config flow for the S&P DOMEO EVO integration."""
+"""Config flow for the S&P DOMEO EVO integration (and the Domeo 210)."""
 
 from collections.abc import Mapping
 import logging
@@ -29,6 +29,7 @@ from .const import (
     CONF_VARIANT,
     DEFAULT_PORT,
     DOMAIN,
+    MODEL_DOMEO_210,
     PARITIES,
     PARITY_EVEN,
     TYPE_SERIAL,
@@ -37,12 +38,13 @@ from .const import (
 from .domeo_evo_modbus import (
     DEFAULT_BAUDRATE,
     DEFAULT_UNIT_ID,
-    DomeoEvo,
+    AnyDomeo,
     Model,
+    NotADomeo210Error,
     NotADomeoEvoError,
     Variant,
 )
-from .helpers import create_modbus_params
+from .helpers import create_device, create_modbus_params
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ UNIT_ID_SELECTOR = probatio.All(
 DEVICE_FIELDS = {
     probatio.Required(CONF_MODEL, default=Model.DOMEO_EVO_225.value): SelectSelector(
         SelectSelectorConfig(
-            options=[model.value for model in Model],
+            options=[*(model.value for model in Model), MODEL_DOMEO_210],
             translation_key=CONF_MODEL,
             mode=SelectSelectorMode.DROPDOWN,
         )
@@ -118,15 +120,26 @@ IDENTITY_KEYS = {
 }
 
 
+class _VariantNotAvailableError(Exception):
+    """The chosen model has no such variant."""
+
+
 class _UnitSilentError(Exception):
     """The link is up, but the unit behind it does not answer."""
 
 
-async def _async_probe(hass: HomeAssistant, data: Mapping[str, Any]) -> DomeoEvo:
+def _is_210(data: Mapping[str, Any]) -> bool:
+    """Whether config entry data describes a Domeo 210."""
+    return bool(data[CONF_MODEL] == MODEL_DOMEO_210)
+
+
+async def _async_probe(hass: HomeAssistant, data: Mapping[str, Any]) -> AnyDomeo:
     """Read the unit behind these link settings, or raise."""
     params = create_modbus_params(data)
+    if _is_210(data) and data[CONF_VARIANT] == Variant.SERENITE:
+        raise _VariantNotAvailableError
     async with async_get_temporary_unit(hass, params, data[CONF_UNIT_ID]) as unit:
-        device = DomeoEvo(unit, Model(data[CONF_MODEL]), Variant(data[CONF_VARIANT]))
+        device = create_device(unit, data)
         try:
             await device.async_validate()
         except ModbusTimeoutError as err:
@@ -134,6 +147,17 @@ async def _async_probe(hass: HomeAssistant, data: Mapping[str, Any]) -> DomeoEvo
                 raise _UnitSilentError from err
             raise
     return device
+
+
+# What the form shows for each known way a probe fails, first match wins.
+_PROBE_ERRORS: tuple[tuple[type[Exception], str], ...] = (
+    (_VariantNotAvailableError, "variant_not_available"),
+    (_UnitSilentError, "unit_silent"),
+    (NotADomeoEvoError, "not_a_domeo_evo"),
+    (NotADomeo210Error, "not_a_domeo_210"),
+    (ModbusError, "cannot_connect"),
+    (HomeAssistantError, "cannot_connect"),
+)
 
 
 def _same_unit(data: Mapping[str, Any], other: Mapping[str, Any]) -> bool:
@@ -240,6 +264,13 @@ class DomeoEvoConfigFlow(ConfigFlow, domain=DOMAIN):
                 if other.entry_id != entry.entry_id
             ):
                 return self.async_abort(reason="already_configured")
+            # Another range has other entities: the old ones would linger.
+            if _is_210(data) != _is_210(entry.data):
+                return self.async_show_form(
+                    step_id=step_id,
+                    data_schema=self.add_suggested_values_to_schema(schema, user_input),
+                    errors={"base": "range_changed"},
+                )
 
             # One port cannot run two line settings at once, so a running
             # entry gives up its link before the new settings are probed.
@@ -276,16 +307,20 @@ class DomeoEvoConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _async_validate(
         self, data: dict[str, Any]
-    ) -> tuple[DomeoEvo | None, dict[str, str], dict[str, str]]:
+    ) -> tuple[AnyDomeo | None, dict[str, str], dict[str, str]]:
         """Probe the unit, returning it or the errors to show instead."""
         try:
             device = await _async_probe(self.hass, data)
-        except _UnitSilentError:
-            return None, {"base": "unit_silent"}, {}
-        except NotADomeoEvoError:
-            return None, {"base": "not_a_domeo_evo"}, {}
-        except ModbusError, HomeAssistantError:
-            return None, {"base": "cannot_connect"}, {}
+        except (
+            _VariantNotAvailableError,
+            _UnitSilentError,
+            NotADomeoEvoError,
+            NotADomeo210Error,
+            ModbusError,
+            HomeAssistantError,
+        ) as err:
+            error = next(key for kind, key in _PROBE_ERRORS if isinstance(err, kind))
+            return None, {"base": error}, {}
         except Exception:
             _LOGGER.exception("Unexpected exception")
             return None, {"base": "unknown"}, {}
