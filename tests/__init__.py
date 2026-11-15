@@ -65,3 +65,6 @@ def serenite_image() -> dict[str, dict[int, Any]]:
 
 
 MOCK_SERENITE_DATA = {**MOCK_TCP_DATA, CONF_VARIANT: "serenite"}
+
+MOCK_210_TITLE = "Domeo 210"
+MOCK_210_DATA = {**MOCK_TCP_DATA, CONF_MODEL: "210"}

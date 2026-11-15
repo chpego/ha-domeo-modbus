@@ -24,7 +24,7 @@ class Controls(Component):
     _clp_contact = coil(2, writable=True)  # coil 3
     # The table gives 0 = On and 1 = Off for holiday mode, but reports from
     # two real units point the other way: 1 = On, like every other coil
-    # (chpego/ha-domeo-evo#6).
+    # (chpego/ha-domeo-modbus#6).
     _holiday_mode = coil(3, writable=True)  # coil 4
     _auto_bypass = coil(4, writable=True)  # coil 5
     _manual_bypass = coil(5, writable=True)  # coil 6

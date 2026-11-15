@@ -10,7 +10,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .coordinator import DomeoEvoConfigEntry
+from .coordinator import DomeoEvoConfigEntry, DomeoEvoRuntimeData
 from .domeo_evo_modbus import AutoMode, ClpContact, DomeoEvo
 from .entity import DomeoEvoEntity, DomeoEvoEntityDescription
 
@@ -62,10 +62,13 @@ async def async_setup_entry(
     entry: DomeoEvoConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the DOMEO EVO selects."""
+    """Set up the DOMEO EVO selects. The Domeo 210 has none."""
     runtime_data = entry.runtime_data
+    device = runtime_data.device
+    if not isinstance(device, DomeoEvo):
+        return
     async_add_entities(
-        DomeoEvoSelect(runtime_data, description) for description in SELECTS
+        DomeoEvoSelect(runtime_data, description, device) for description in SELECTS
     )
 
 
@@ -74,17 +77,25 @@ class DomeoEvoSelect(DomeoEvoEntity, SelectEntity):
 
     entity_description: DomeoEvoSelectEntityDescription
 
+    def __init__(
+        self,
+        runtime_data: DomeoEvoRuntimeData,
+        entity_description: DomeoEvoSelectEntityDescription,
+        device: DomeoEvo,
+    ) -> None:
+        """Initialize the select for a DOMEO EVO, the only range with selects."""
+        super().__init__(runtime_data, entity_description)
+        self._device = device
+
     @property
     @override
     def current_option(self) -> str | None:
         """Return the selected option."""
-        value = self.entity_description.value_fn(self.coordinator.device)
+        value = self.entity_description.value_fn(self._device)
         return None if value is None else value.name.lower()
 
     @override
     async def async_select_option(self, option: str) -> None:
         """Write the selected option to the unit."""
         value = self.entity_description.options_enum[option.upper()]
-        await self._async_write(
-            self.entity_description.write_fn(self.coordinator.device, value)
-        )
+        await self._async_write(self.entity_description.write_fn(self._device, value))

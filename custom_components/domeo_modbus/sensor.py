@@ -3,7 +3,7 @@
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import override
+from typing import Any, override
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -13,6 +13,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import (
     PERCENTAGE,
+    REVOLUTIONS_PER_MINUTE,
     EntityCategory,
     UnitOfElectricPotential,
     UnitOfRatio,
@@ -25,8 +26,12 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from .coordinator import DomeoEvoConfigEntry
 from .domeo_evo_modbus import (
     AirSensType,
+    AnyDomeo,
+    BypassState,
     ControlPanel,
+    Domeo210,
     DomeoEvo,
+    HeaterState,
     LimitSwitchState,
     OperatingMode,
     PreheaterState,
@@ -47,23 +52,23 @@ def _option(value: IntEnum | None) -> str | None:
 
 
 @dataclass(frozen=True, kw_only=True)
-class DomeoEvoSensorEntityDescription(
+class DomeoEvoSensorEntityDescription[D: AnyDomeo = DomeoEvo](
     SensorEntityDescription, DomeoEvoEntityDescription
 ):
-    """Describe a DOMEO EVO sensor."""
+    """Describe a sensor of one range of units, or of both."""
 
-    value_fn: Callable[[DomeoEvo], float | str | None]
-    exists_fn: Callable[[DomeoEvo], bool] = lambda device: True
+    value_fn: Callable[[D], float | str | None]
+    exists_fn: Callable[[D], bool] = lambda device: True
 
 
-def _temperature(
+def _temperature[D: AnyDomeo](
     key: str,
-    value_fn: Callable[[DomeoEvo], float | None],
+    value_fn: Callable[[D], float | None],
     *,
     enabled_default: bool = True,
-) -> DomeoEvoSensorEntityDescription:
-    """Describe one of the unit's five temperature probes."""
-    return DomeoEvoSensorEntityDescription(
+) -> DomeoEvoSensorEntityDescription[D]:
+    """Describe one of the unit's temperature probes."""
+    return DomeoEvoSensorEntityDescription[D](
         key=key,
         translation_key=key,
         component="readings",
@@ -75,8 +80,9 @@ def _temperature(
     )
 
 
-SENSORS: tuple[DomeoEvoSensorEntityDescription, ...] = (
-    DomeoEvoSensorEntityDescription(
+# The sensors both ranges have.
+COMMON_SENSORS: tuple[DomeoEvoSensorEntityDescription[AnyDomeo], ...] = (
+    DomeoEvoSensorEntityDescription[AnyDomeo](
         key="airflow",
         translation_key="airflow",
         component="readings",
@@ -85,6 +91,14 @@ SENSORS: tuple[DomeoEvoSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
         value_fn=lambda device: device.readings.airflow,
     ),
+    _temperature("extract_temperature", lambda d: d.readings.extract_temperature),
+    _temperature("exhaust_temperature", lambda d: d.readings.exhaust_temperature),
+    _temperature("outdoor_temperature", lambda d: d.readings.outdoor_temperature),
+    _temperature("supply_temperature", lambda d: d.readings.supply_temperature),
+)
+
+# The sensors only the DOMEO EVO has.
+SENSORS: tuple[DomeoEvoSensorEntityDescription, ...] = (
     DomeoEvoSensorEntityDescription(
         key="humidity",
         component="readings",
@@ -103,10 +117,6 @@ SENSORS: tuple[DomeoEvoSensorEntityDescription, ...] = (
         options=_options(OperatingMode),
         value_fn=lambda device: _option(device.readings.operating_mode),
     ),
-    _temperature("extract_temperature", lambda d: d.readings.extract_temperature),
-    _temperature("exhaust_temperature", lambda d: d.readings.exhaust_temperature),
-    _temperature("outdoor_temperature", lambda d: d.readings.outdoor_temperature),
-    _temperature("supply_temperature", lambda d: d.readings.supply_temperature),
     _temperature(
         "pre_exchanger_temperature",
         # Not every unit has this probe. One without it flags a fault and
@@ -159,6 +169,74 @@ SENSORS: tuple[DomeoEvoSensorEntityDescription, ...] = (
     ),
 )
 
+
+def _heater_state(
+    key: str,
+    value_fn: Callable[[Domeo210], HeaterState | None],
+    exists_fn: Callable[[Domeo210], bool],
+) -> DomeoEvoSensorEntityDescription[Domeo210]:
+    """Describe the state of one of the optional heating batteries."""
+    return DomeoEvoSensorEntityDescription[Domeo210](
+        key=key,
+        translation_key=key,
+        component="readings",
+        device_class=SensorDeviceClass.ENUM,
+        options=_options(HeaterState),
+        value_fn=lambda device: _option(value_fn(device)),
+        exists_fn=exists_fn,
+    )
+
+
+def _fan_speed(
+    key: str, value_fn: Callable[[Domeo210], int | None]
+) -> DomeoEvoSensorEntityDescription[Domeo210]:
+    """Describe the speed of one of the two fans (2014 table only)."""
+    return DomeoEvoSensorEntityDescription[Domeo210](
+        key=key,
+        translation_key=key,
+        component="extras",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=value_fn,
+        exists_fn=lambda device: device.extras is not None,
+    )
+
+
+# The sensors only the Domeo 210 has.
+SENSORS_210: tuple[DomeoEvoSensorEntityDescription[Domeo210], ...] = (
+    DomeoEvoSensorEntityDescription[Domeo210](
+        key="bypass_state",
+        translation_key="bypass_state",
+        component="readings",
+        device_class=SensorDeviceClass.ENUM,
+        options=_options(BypassState),
+        value_fn=lambda device: _option(device.readings.bypass_state),
+    ),
+    _heater_state(
+        "preheater_battery",
+        lambda device: device.readings.preheater_state,
+        lambda device: bool(device.controls.preheater_installed),
+    ),
+    _heater_state(
+        "postheater_battery",
+        lambda device: device.readings.postheater_state,
+        lambda device: bool(device.controls.postheater_installed),
+    ),
+    _fan_speed(
+        "extract_fan_speed",
+        lambda device: (
+            None if device.extras is None else device.extras.extract_motor_speed
+        ),
+    ),
+    _fan_speed(
+        "supply_fan_speed",
+        lambda device: (
+            None if device.extras is None else device.extras.supply_motor_speed
+        ),
+    ),
+)
+
 _PROBE_DEVICE_CLASSES: dict[AirSensType, tuple[SensorDeviceClass, str]] = {
     AirSensType.HUMIDITY: (SensorDeviceClass.HUMIDITY, PERCENTAGE),
     AirSensType.CO2: (SensorDeviceClass.CO2, UnitOfRatio.PARTS_PER_MILLION),
@@ -204,20 +282,25 @@ async def async_setup_entry(
     entry: DomeoEvoConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the DOMEO EVO sensors."""
+    """Set up the sensors of the unit."""
     runtime_data = entry.runtime_data
     device = runtime_data.device
+    descriptions: list[DomeoEvoSensorEntityDescription[Any]] = list(COMMON_SENSORS)
+    if isinstance(device, Domeo210):
+        descriptions += (d for d in SENSORS_210 if d.exists_fn(device))
+    else:
+        descriptions += (
+            d for d in (*SENSORS, *_probe_sensors(device)) if d.exists_fn(device)
+        )
     async_add_entities(
-        DomeoEvoSensor(runtime_data, description)
-        for description in (*SENSORS, *_probe_sensors(device))
-        if description.exists_fn(device)
+        DomeoEvoSensor(runtime_data, description) for description in descriptions
     )
 
 
 class DomeoEvoSensor(DomeoEvoEntity, SensorEntity):
-    """A DOMEO EVO sensor."""
+    """A sensor of the unit."""
 
-    entity_description: DomeoEvoSensorEntityDescription
+    entity_description: DomeoEvoSensorEntityDescription[Any]
 
     @property
     @override

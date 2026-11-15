@@ -6,6 +6,16 @@ from modbus_connection.model import UpdateReport
 
 from .controls import Controls
 from .device import ALL, READINGS, SETTINGS, DomeoEvo, NotADomeoEvoError, Source
+from .domeo210 import (
+    FLOW_LIMITS_210,
+    BypassState,
+    DefrostType,
+    Domeo210,
+    Domeo210Version,
+    HeaterState,
+    HumiditySettings210,
+    NotADomeo210Error,
+)
 from .enums import (
     AirSensType,
     AutoMode,
@@ -31,6 +41,9 @@ DEFAULT_PARITY: Final[Literal["E"]] = "E"
 DEFAULT_STOPBITS: Final[Literal[1]] = 1
 DEFAULT_UNIT_ID: Final = 1
 
+# Either range of unit.
+type AnyDomeo = DomeoEvo | Domeo210
+
 __all__ = [
     "ALL",
     "DEFAULT_BAUDRATE",
@@ -38,22 +51,31 @@ __all__ = [
     "DEFAULT_STOPBITS",
     "DEFAULT_UNIT_ID",
     "FLOW_LIMITS",
+    "FLOW_LIMITS_210",
     "PROBES",
     "READINGS",
     "SETTINGS",
     "AirSensProbes",
     "AirSensType",
+    "AnyDomeo",
     "AutoMode",
+    "BypassState",
     "ClpContact",
     "ControlPanel",
     "Controls",
+    "DefrostType",
+    "Domeo210",
+    "Domeo210Version",
     "DomeoEvo",
     "EquipmentVersion",
     "FlowLimits",
+    "HeaterState",
     "HumiditySettings",
+    "HumiditySettings210",
     "Identity",
     "LimitSwitchState",
     "Model",
+    "NotADomeo210Error",
     "NotADomeoEvoError",
     "OperatingMode",
     "PreheatMode",

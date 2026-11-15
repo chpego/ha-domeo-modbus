@@ -11,6 +11,9 @@ CONF_PARITY = "parity"
 CONF_UNIT_ID = "unit_id"
 CONF_VARIANT = "variant"
 
+# The model option of the previous range, next to the DOMEO EVO sizes.
+MODEL_DOMEO_210 = "210"
+
 PARITY_EVEN = "even"
 # The serial parity choices, as ModbusSerialParams spells them.
 PARITIES: dict[str, Literal["E", "O", "N"]] = {"even": "E", "odd": "O", "none": "N"}

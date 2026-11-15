@@ -54,10 +54,13 @@
 | DOMEO EVO 225 FL | Expected to work | Same unit with a wired control panel, not yet tested |
 | DOMEO EVO 315, 450 | Expected to work | Same register table; airflow ranges per model from the S&P table |
 | DHU, Sérénité variants | Expected to work | Humidity regulation and AIRSENS probes follow the S&P table, tested on a simulator |
+| Domeo 210 FL and DHU (previous range) | Being tested | Built on the two S&P tables of 2017 (FL, and DHU for France) and a Domeo 210 YAML in use since 2021; not yet tested by an owner ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)). Choose **Domeo 210** in the model list, then FL or DHU. |
 
-**Not supported:** the previous Domeo range (Domeo 210, the previous Domeo DHU or Hygro, Flexeo, Ideo, and the Atacama sold by Leroy Merlin). It uses another register table, where the same addresses mean other settings, so the integration refuses these units when you add them ([#7](https://github.com/chpego/ha-domeo-modbus/issues/7)). "DHU" here means the DOMEO EVO DHU.
+**Domeo 210, still unconfirmed on a real unit:** the order of input registers 22 and 23 (exhaust, then outdoor temperature) and holiday mode and the automatic bypass turning on with 1. Both 2017 tables say so; an older table of 2014 says the opposite. The DHU also gets its humidity regulation settings; it reports no humidity reading over Modbus. The 210 does not report jumper JP1, so a refused command is the only sign that JP1 is open. In the Europe version (three speeds and standby) there is no boost button, and the holiday switch is a standby switch.
 
-**Why `domeo_modbus`?** The technical name (domain `domeo_modbus`, repository `ha-domeo-modbus`) is not tied to the EVO range so that the previous Domeo range can be added to this same integration later, with its own register table ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15), testers welcome). Until then, only DOMEO EVO units are supported, and the integration is shown as **S&P DOMEO EVO**.
+**Not supported:** the rest of the previous Domeo range (the previous Domeo DHU or Hygro, Flexeo, Ideo, and the Atacama sold by Leroy Merlin). It uses other register tables, where the same addresses mean other settings, so the integration refuses these units when you add them as a DOMEO EVO ([#7](https://github.com/chpego/ha-domeo-modbus/issues/7)). "DHU" here means the DOMEO EVO DHU. The Atacama is said to have the same board as the Domeo 210 (HACF topic 3947): adding it as a Domeo 210 may work, but nobody has tried yet.
+
+**Why `domeo_modbus`?** The technical name (domain `domeo_modbus`, repository `ha-domeo-modbus`) is not tied to the EVO range, so the previous Domeo range goes into this same integration, with its own register table ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15), testers welcome). The integration is still shown as **S&P DOMEO EVO**.
 
 Have one of these units? A test report with your diagnostics file is very welcome: [open an issue](https://github.com/chpego/ha-domeo-modbus/issues).
 

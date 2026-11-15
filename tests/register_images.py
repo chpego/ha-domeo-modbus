@@ -1,7 +1,8 @@
-"""Register images of a DOMEO EVO, for tests that need no hardware.
+"""Register images of a DOMEO EVO and a Domeo 210, for tests without hardware.
 
 Load one into ``modbus_connection.mock`` with ``load_image``. Addresses are
-protocol (PDU) addresses: the S&P table number minus its base, minus one.
+protocol (PDU) addresses: on a DOMEO EVO, the S&P table number minus its base,
+minus one; on a Domeo 210, the table number as it is.
 """
 
 from __future__ import annotations
@@ -73,28 +74,92 @@ FACTORY_225_FL: dict[str, dict[int, Any]] = {
     },
 }
 
-# A unit of the previous Domeo range (Domeo 210 FL, from the S&P tables of
-# 2014 and 2017), read at the DOMEO EVO addresses. It is not a DOMEO EVO. Its
-# tables leave input registers 0 to 5 undocumented; this image assumes they
-# read 0.
+# A factory-fresh Domeo 210 FL, France version, from the previous range (S&P
+# tables of 2014 and 2017). It is not a DOMEO EVO. Its tables leave input
+# registers 0 to 5 undocumented; this image assumes they read 0, so it can
+# also stand for a Domeo 210 read at the DOMEO EVO addresses.
 PREVIOUS_DOMEO_210_FL: dict[str, dict[int, Any]] = {
     "input": {
         **dict.fromkeys(range(6), 0),
         6: 123,  # firmware 12.3
-        9: 0,  # type of unit: Domeo 210 FL
-        10: 1,  # type of control: constant airflow
-        13: 60,  # low airflow
-        14: 135,  # boost airflow
+        7: 105,  # 2014 table: control panel firmware 10.5
+        8: 0,  # 2014 table: programming console firmware
+        9: 0,  # 2014 table: type of unit, Domeo 210 FL
+        10: 1,  # 2014 table: type of control, constant airflow
+        12: 0,  # 2014 table: airflow unbalance
+        13: 60,  # 2014 table: low airflow
+        14: 135,  # 2014 table: boost airflow
+        15: 210,  # 2014 table: freecooling airflow
         16: 60,  # current airflow (30017 on a DOMEO EVO)
-        17: 0,  # 0-10 V input
+        17: 0,  # 2014 table: 0-10 V input, mV
+        19: 1450,  # 2014 table: extract fan, rpm
+        20: 1520,  # 2014 table: supply fan, rpm
         21: 215,  # extract 21.5 °C (30022 on a DOMEO EVO)
         22: 98,  # exhaust 9.8 °C
         23: _signed(-35),  # outdoor -3.5 °C
         24: 187,  # supply 18.7 °C
+        25: 0,  # bypass closed
+        26: 0,  # pre-heating battery off
+        27: 0,  # post-heating battery off
     },
     "discrete": dict.fromkeys(range(17), False),
-    "coil": dict.fromkeys(range(15), False),
-    "holding": {0: 1, 1: 8, 2: 2, 8: 0, 9: 60, 10: 135, 11: 210, 15: 0},
+    "coil": {
+        **dict.fromkeys(range(15), False),
+        8: True,  # automatic bypass on
+    },
+    "holding": {
+        0: 1,  # unit id 1
+        1: 8,  # 19200 baud
+        2: 2,  # even parity
+        8: 0,  # airflow unbalance
+        9: 60,  # low airflow
+        10: 135,  # boost airflow
+        11: 210,  # freecooling airflow
+        15: 0,  # airflow command: low
+        16: 60,  # FL table: 0-10 V minimum airflow
+        17: 210,  # FL table: 0-10 V maximum airflow
+        22: 12,  # bypass: outdoor minimum
+        23: 24,  # bypass: indoor minimum
+        24: 8,  # manual bypass duration, h
+        25: 0,
+        26: 5,
+        27: 4,
+        28: 18,
+        31: 6,  # filter interval, months
+        32: 0,  # FL table: 0-10 V minimum voltage
+        33: 100,  # FL table: 0-10 V maximum voltage
+    },
+}
+
+# A factory-fresh Domeo 210 DHU, France version (S&P "Domeo humedad para
+# Francia" table of 2017): the FL image without the FL-only registers, plus
+# the humidity regulation.
+PREVIOUS_DOMEO_210_DHU: dict[str, dict[int, Any]] = deepcopy(PREVIOUS_DOMEO_210_FL)
+for _address in (16, 17, 32, 33):
+    del PREVIOUS_DOMEO_210_DHU["holding"][_address]
+PREVIOUS_DOMEO_210_DHU["holding"].update(
+    {
+        18: 60,  # humidity regulation: minimum airflow
+        19: 210,  # humidity regulation: maximum airflow
+        20: 60,  # humidity regulation: minimum level, %RH
+        21: 90,  # humidity regulation: maximum level, %RH
+    }
+)
+
+# Every address the 2017 table of each Domeo 210 variant documents, by space,
+# plus the input registers only the 2014 table documents.
+_DOCUMENTED_210_INPUTS = {*range(6, 11), *range(12, 18), 19, 20, *range(21, 28)}
+DOCUMENTED_210: dict[str, set[int]] = {
+    "input": _DOCUMENTED_210_INPUTS,
+    "discrete": {5, 6, 7, *range(10, 15)},
+    "coil": {1, 2, 3, 4, 6, 7, 8, 9, 12, 13, 14},
+    "holding": {0, 1, 2, 8, 9, 10, 11, *range(15, 18), *range(22, 29), *range(31, 34)},
+}
+DOCUMENTED_210_DHU: dict[str, set[int]] = {
+    "input": _DOCUMENTED_210_INPUTS,
+    "discrete": {5, 6, 7, *range(10, 15)},
+    "coil": {2, 3, 4, 6, 7, 8, 9, 12, 13, 14},
+    "holding": {0, 1, 2, 8, 9, 10, 11, 15, *range(18, 29), 31},
 }
 
 # Every address the S&P table documents, by space.
