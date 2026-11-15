@@ -393,7 +393,7 @@
         "variant": {
             "options": {
                 "dhu": "DHU (humidity detection)",
-                "fl": "FL or RD (no humidity regulation)",
+                "fl": "FL (or RD on a DOMEO EVO), no humidity regulation",
                 "serenite": "S\u00e9r\u00e9nit\u00e9 (air quality and humidity)"
             }
         }
