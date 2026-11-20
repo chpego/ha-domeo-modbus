@@ -54,9 +54,10 @@
 | DOMEO EVO 225 FL | Devrait fonctionner | Même VMC avec une commande filaire, pas encore testée |
 | DOMEO EVO 315, 450 | Devrait fonctionner | Même table de registres ; plages de débit par modèle selon la table S&P |
 | Variantes DHU, Sérénité | Devrait fonctionner | Régulation hygro et sondes AIRSENS selon la table S&P, testées sur un simulateur |
-| Domeo 210 FL et DHU (ancienne gamme) | En test | Construite sur les deux tables S&P de 2017 (FL, et DHU pour la France) et un YAML Domeo 210 utilisé depuis 2021 ; pas encore testée par un propriétaire ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)). Choisissez **Domeo 210** dans la liste des modèles, puis FL ou DHU. |
+| Domeo 210 DHU (ancienne gamme) | En test | Une vraie 210 DHU, version France ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)) : lectures, mode vacances, by-pass manuel, démarrage du boost, reset filtre accepté. Choisissez **Domeo 210** dans la liste des modèles, puis DHU. |
+| Domeo 210 FL (ancienne gamme) | Devrait fonctionner | Construite sur la table S&P de 2017 pour la FL et un YAML Domeo 210 utilisé depuis 2021 ; pas encore testée par un propriétaire. Choisissez **Domeo 210**, puis FL. |
 
-**Domeo 210, encore à confirmer sur une vraie VMC :** l'ordre des registres input 22 et 23 (température de rejet, puis d'air neuf), et l'activation du mode vacances et du by-pass automatique avec 1. Les deux tables de 2017 le disent ; une table plus ancienne, de 2014, dit l'inverse. La DHU a aussi ses réglages de régulation hygro ; elle ne transmet aucune mesure d'humidité par Modbus. La 210 ne signale pas le cavalier JP1 : une commande refusée est le seul signe que JP1 est ouvert. Dans la version Europe (trois vitesses et veille), il n'y a pas de bouton boost, et l'interrupteur vacances devient un interrupteur de veille.
+**Domeo 210 :** une vraie 210 DHU a confirmé l'ordre des registres input 22 et 23 (température de rejet, puis d'air neuf) et l'activation du mode vacances avec 1, comme le disent les deux tables de 2017 (une table plus ancienne, de 2014, dit l'inverse). Le by-pass automatique reste à confirmer : il ne s'ouvre que si l'air extérieur est assez doux. La DHU a aussi ses réglages de régulation hygro ; elle ne transmet aucune mesure d'humidité par Modbus. La 210 ne signale pas le cavalier JP1 : une commande refusée est le seul signe que JP1 est ouvert. Dans la version Europe (trois vitesses et veille), il n'y a pas de bouton boost, et l'interrupteur vacances devient un interrupteur de veille.
 
 **Non prises en charge :** le reste de l'ancienne gamme Domeo (ancienne Domeo DHU ou Hygro, Flexeo, Ideo, et l'Atacama vendue par Leroy Merlin). Elle utilise d'autres tables de registres, où les mêmes adresses correspondent à d'autres réglages : l'intégration refuse donc ces VMC si on les ajoute comme DOMEO EVO ([#7](https://github.com/chpego/ha-domeo-modbus/issues/7)). Ici, « DHU » désigne la DOMEO EVO DHU. L'Atacama aurait la même carte que la Domeo 210 (sujet HACF 3947) : l'ajouter comme Domeo 210 pourrait fonctionner, mais personne ne l'a encore essayé.
 
@@ -164,8 +165,10 @@ mode: single
 
 - **Mode vacances.** La table S&P indique pour le coil 4 « 0 = On », mais les retours de deux vraies VMC indiquent l'inverse : l'intégration le lit et l'écrit donc en « 1 = On » ([#6](https://github.com/chpego/ha-domeo-modbus/issues/6)). Si l'interrupteur affiche le contraire de ce que fait votre VMC, signalez-le dans une issue.
 - **Pas d'arrêt du boost.** La table dit qu'écrire 0 arrête le boost, mais une vraie VMC l'ignore (en FC06 comme en FC16), et le support S&P a confirmé qu'un boost ne peut pas être arrêté par Modbus. Il s'arrête seul au bout de 30 minutes, l'intégration n'a donc pas de bouton d'arrêt.
-- **Pas de boost en mode vacances.** Une vraie VMC ne lance pas de boost tant que le mode vacances est activé. Le bouton de boost affiche alors un message demandant de désactiver d'abord le mode vacances.
+- **Pas de boost en mode vacances (DOMEO EVO).** Une vraie VMC ne lance pas de boost tant que le mode vacances est activé. Le bouton de boost affiche alors un message demandant de désactiver d'abord le mode vacances.
 - **Reset du filtre.** En cours de confirmation sur de vraies VMC. L'intégration écrit le coil 8, comme l'indique la table.
+- **Domeo 210 : boost en mode vacances.** La VMC reste au débit vacances mais compte quand même les 30 minutes du boost : désactiver le mode vacances pendant ce temps donne le débit boost ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)). Sur la 210, le bouton de boost ne vérifie pas le mode vacances.
+- **Domeo 210 DHU : débit minimum hygro.** Une vraie VMC a refusé une valeur que sa table autorise (exception Modbus 0x04) ; la cause est en cours de recherche ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)).
 
 ## Dépannage
 

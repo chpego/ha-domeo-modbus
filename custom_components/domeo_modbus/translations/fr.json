@@ -364,6 +364,9 @@
     "write_failed": {
       "message": "Échec de l'envoi de la commande à la VMC : {error}"
     },
+    "write_not_carried_out": {
+      "message": "La VMC n'a pas pu exécuter la commande ({error}). Elle refuse parfois une valeur qui entre en conflit avec un autre de ses réglages."
+    },
     "write_refused": {
       "message": "La VMC a refusé la commande ({error}). Vérifiez que le cavalier JP1 de sa carte est fermé : tant que JP1 est ouvert, la VMC répond aux lectures mais n'obéit qu'à sa télécommande."
     }

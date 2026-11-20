@@ -364,6 +364,9 @@
         "write_failed": {
             "message": "Failed to send the command to the unit: {error}"
         },
+        "write_not_carried_out": {
+          "message": "The unit could not carry out the command ({error}). It sometimes refuses a value that conflicts with another of its settings."
+        },
         "write_refused": {
             "message": "The unit refused the command ({error}). Check that jumper JP1 on its board is closed: while JP1 is open, the unit answers readings but only takes orders from its control panel."
         }

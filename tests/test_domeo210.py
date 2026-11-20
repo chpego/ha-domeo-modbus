@@ -21,9 +21,9 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er, issue_registry as ir
-from modbus_connection import IllegalDataAddressError
+from modbus_connection import IllegalDataAddressError, ServerDeviceFailureError
 from modbus_connection.mock import MockModbusUnit, WriteEvent
 import pytest
 from pytest_homeassistant_custom_component.common import (
@@ -375,6 +375,34 @@ async def test_dhu_humidity_regulation(
             },
             blocking=True,
         )
+
+
+@pytest.mark.parametrize(
+    ("register_image", "entry_data"),
+    [(PREVIOUS_DOMEO_210_DHU, {**MOCK_210_DATA, CONF_VARIANT: "dhu"})],
+    indirect=True,
+)
+@pytest.mark.usefixtures("init_integration")
+async def test_dhu_refusing_a_value_its_table_allows(
+    hass: HomeAssistant, mock_unit: MockModbusUnit
+) -> None:
+    """Test a write the unit cannot carry out raises its own translated error.
+
+    A real 210 DHU answered exception 0x04 to a humidity minimum airflow of
+    115 m³/h, which its table allows.
+    """
+    mock_unit.fail_write(18, ServerDeviceFailureError())
+    with pytest.raises(HomeAssistantError) as exc_info:
+        await hass.services.async_call(
+            NUMBER_DOMAIN,
+            SERVICE_SET_VALUE,
+            {
+                ATTR_ENTITY_ID: "number.domeo_210_humidity_minimum_airflow",
+                ATTR_VALUE: 115,
+            },
+            blocking=True,
+        )
+    assert exc_info.value.translation_key == "write_not_carried_out"
 
 
 @pytest.mark.usefixtures("init_integration")

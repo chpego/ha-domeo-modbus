@@ -54,9 +54,10 @@
 | DOMEO EVO 225 FL | Expected to work | Same unit with a wired control panel, not yet tested |
 | DOMEO EVO 315, 450 | Expected to work | Same register table; airflow ranges per model from the S&P table |
 | DHU, Sérénité variants | Expected to work | Humidity regulation and AIRSENS probes follow the S&P table, tested on a simulator |
-| Domeo 210 FL and DHU (previous range) | Being tested | Built on the two S&P tables of 2017 (FL, and DHU for France) and a Domeo 210 YAML in use since 2021; not yet tested by an owner ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)). Choose **Domeo 210** in the model list, then FL or DHU. |
+| Domeo 210 DHU (previous range) | Being tested | One real 210 DHU, France version ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)): readings, holiday mode, manual bypass, start boost, filter reset accepted. Choose **Domeo 210** in the model list, then DHU. |
+| Domeo 210 FL (previous range) | Expected to work | Built on the S&P table of 2017 for the FL and a Domeo 210 YAML in use since 2021; not yet tested by an owner. Choose **Domeo 210**, then FL. |
 
-**Domeo 210, still unconfirmed on a real unit:** the order of input registers 22 and 23 (exhaust, then outdoor temperature) and holiday mode and the automatic bypass turning on with 1. Both 2017 tables say so; an older table of 2014 says the opposite. The DHU also gets its humidity regulation settings; it reports no humidity reading over Modbus. The 210 does not report jumper JP1, so a refused command is the only sign that JP1 is open. In the Europe version (three speeds and standby) there is no boost button, and the holiday switch is a standby switch.
+**Domeo 210:** a real 210 DHU confirmed the order of input registers 22 and 23 (exhaust, then outdoor temperature) and holiday mode turning on with 1, as both 2017 tables say (an older table of 2014 says the opposite). The automatic bypass is still unconfirmed: it only opens when the outdoor air is warm enough. The DHU also gets its humidity regulation settings; it reports no humidity reading over Modbus. The 210 does not report jumper JP1, so a refused command is the only sign that JP1 is open. In the Europe version (three speeds and standby) there is no boost button, and the holiday switch is a standby switch.
 
 **Not supported:** the rest of the previous Domeo range (the previous Domeo DHU or Hygro, Flexeo, Ideo, and the Atacama sold by Leroy Merlin). It uses other register tables, where the same addresses mean other settings, so the integration refuses these units when you add them as a DOMEO EVO ([#7](https://github.com/chpego/ha-domeo-modbus/issues/7)). "DHU" here means the DOMEO EVO DHU. The Atacama is said to have the same board as the Domeo 210 (HACF topic 3947): adding it as a Domeo 210 may work, but nobody has tried yet.
 
@@ -164,8 +165,10 @@ mode: single
 
 - **Holiday mode.** The S&P table says coil 4 is *0 = on*, but reports from two real units point the other way, so the integration reads and writes it as *1 = on* ([#6](https://github.com/chpego/ha-domeo-modbus/issues/6)). If the switch shows the opposite of what your unit does, please say so in an issue.
 - **No stop boost.** The table says writing 0 stops a boost, but a real unit ignores it (FC06 and FC16 alike), and S&P support confirmed a boost cannot be stopped over Modbus. It ends on its own after 30 minutes, so the integration has no stop button.
-- **No boost in holiday mode.** A real unit does not start a boost while holiday mode is on. The start boost button then fails with a message asking you to turn holiday mode off first.
+- **No boost in holiday mode (DOMEO EVO).** A real unit does not start a boost while holiday mode is on. The start boost button then fails with a message asking you to turn holiday mode off first.
 - **Filter reset.** Being confirmed on real units. The integration writes coil 8, as the table says.
+- **Domeo 210: boost in holiday mode.** The unit stays at the holiday airflow but still counts the 30 minutes of the boost: turning holiday mode off within that time gives the boost airflow ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)). The start boost button has no holiday check on the 210.
+- **Domeo 210 DHU: humidity minimum airflow.** A real unit refused a value its table allows (Modbus exception 0x04); the cause is being investigated ([#15](https://github.com/chpego/ha-domeo-modbus/issues/15)).
 
 ## Troubleshooting
 
