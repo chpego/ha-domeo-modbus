@@ -7,7 +7,11 @@ from typing import override
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from modbus_connection import IllegalFunctionError, ModbusError
+from modbus_connection import (
+    IllegalFunctionError,
+    ModbusError,
+    ServerDeviceFailureError,
+)
 
 from .const import DOMAIN
 from .coordinator import DomeoEvoCoordinator, DomeoEvoRuntimeData
@@ -68,6 +72,14 @@ class DomeoEvoEntity(CoordinatorEntity[DomeoEvoCoordinator]):
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="write_refused",
+                translation_placeholders={"error": str(err)},
+            ) from err
+        except ServerDeviceFailureError as err:
+            # What a Domeo 210 DHU answered to a humidity regulation airflow
+            # its table allows (chpego/ha-domeo-modbus#15).
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="write_not_carried_out",
                 translation_placeholders={"error": str(err)},
             ) from err
         except ModbusError as err:
